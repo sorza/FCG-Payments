@@ -5,6 +5,8 @@ VisualStudioVersion = 18.0.11217.181 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCG-Payments.Domain", "FCG-Payments.Domain\FCG-Payments.Domain.csproj", "{6F6C6F4B-8969-4A75-9A79-860EE349BAA9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCG-Payments.Application", "FCG-Payments.Application\FCG-Payments.Application.csproj", "{1CDDC667-A04E-4081-9973-66D681A8554F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{6F6C6F4B-8969-4A75-9A79-860EE349BAA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F6C6F4B-8969-4A75-9A79-860EE349BAA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F6C6F4B-8969-4A75-9A79-860EE349BAA9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1CDDC667-A04E-4081-9973-66D681A8554F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1CDDC667-A04E-4081-9973-66D681A8554F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1CDDC667-A04E-4081-9973-66D681A8554F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1CDDC667-A04E-4081-9973-66D681A8554F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
