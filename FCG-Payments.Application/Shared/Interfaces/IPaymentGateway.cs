@@ -1,4 +1,4 @@
-﻿using FCG_Payments.Domain.Payments.Enums;
+﻿using FCG.Shared.Contracts.Enums;
 
 namespace FCG_Payments.Application.Shared.Interfaces
 {

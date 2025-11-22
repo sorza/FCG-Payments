@@ -11,4 +11,10 @@
     <ProjectReference Include="..\FCG-Payments.Domain\FCG-Payments.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="FCG.Shared.Contracts" Version="1.0.6" />
+    <PackageReference Include="FluentValidation" Version="12.1.0" />
+	<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+  </ItemGroup>
+
 </Project>

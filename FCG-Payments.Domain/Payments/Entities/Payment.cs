@@ -1,4 +1,4 @@
-﻿using FCG_Payments.Domain.Payments.Enums;
+﻿using FCG.Shared.Contracts.Enums;
 using FCG_Payments.Domain.Payments.Exceptions.Payments;
 using FCG_Payments.Domain.Shared;
 
@@ -10,14 +10,14 @@ namespace FCG_Payments.Domain.Payments.Entities
 
         public Guid OrderId { get; private set; }
         public EPaymentType PaymentType { get; private set; }
-        public EStatus Status { get; private set; }
+        public EPaymentStatus Status { get; private set; }
 
         #endregion
 
         #region Constructors
         private Payment(Guid id) : base(id) { }
 
-        private Payment(Guid id, Guid orderId, EPaymentType paymentType, EStatus status)
+        private Payment(Guid id, Guid orderId, EPaymentType paymentType, EPaymentStatus status)
             : base(id)
         {
             OrderId = orderId;
@@ -36,15 +36,15 @@ namespace FCG_Payments.Domain.Payments.Entities
             if (!Enum.IsDefined(typeof(EPaymentType), paymentType))
                 throw new InvalidPaymentException(ErrorMessage.Payment.InvalidPaymentType);
 
-            return new Payment(Guid.NewGuid(), orderId, paymentType, EStatus.Pending);
+            return new Payment(Guid.NewGuid(), orderId, paymentType, EPaymentStatus.Pending);
         }
         #endregion
                
 
         #region Methods
-        public void UpdateStatus(EStatus newStatus)
+        public void UpdateStatus(EPaymentStatus newStatus)
         {
-            if (!Enum.IsDefined(typeof(EStatus), newStatus))
+            if (!Enum.IsDefined(typeof(EPaymentStatus), newStatus))
                 throw new InvalidStatusException(ErrorMessage.Payment.InvalidStatus);
             Status = newStatus;
             UpdateLastDateChanged();

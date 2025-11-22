@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCG-Payments.Domain", "FCG-
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCG-Payments.Application", "FCG-Payments.Application\FCG-Payments.Application.csproj", "{1CDDC667-A04E-4081-9973-66D681A8554F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FCG-Payments.Api", "FCG-Payments.Api\FCG-Payments.Api.csproj", "{BCA502CE-DEDC-4327-8423-80993BD08908}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{1CDDC667-A04E-4081-9973-66D681A8554F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CDDC667-A04E-4081-9973-66D681A8554F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CDDC667-A04E-4081-9973-66D681A8554F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCA502CE-DEDC-4327-8423-80993BD08908}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCA502CE-DEDC-4327-8423-80993BD08908}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCA502CE-DEDC-4327-8423-80993BD08908}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCA502CE-DEDC-4327-8423-80993BD08908}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
