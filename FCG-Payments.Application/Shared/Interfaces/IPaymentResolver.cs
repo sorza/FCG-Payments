@@ -2,8 +2,8 @@
 
 namespace FCG_Payments.Application.Shared.Interfaces
 {
-    public interface IPaymentGateway
+    internal interface IPaymentResolver
     {
-        public Task<bool> Pay(Guid OrderId, EPaymentType type);
+         IPaymentStrategy Resolve(EPaymentType type);        
     }
 }

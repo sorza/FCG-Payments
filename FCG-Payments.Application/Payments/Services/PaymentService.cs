@@ -1,7 +1,6 @@
 ﻿using FCG.Shared.Contracts;
 using FCG.Shared.Contracts.Enums;
 using FCG_Payments.Application.Payments.Responses;
-using FCG_Payments.Application.Payments.Validators;
 using FCG_Payments.Application.Shared.Interfaces;
 using FCG_Payments.Application.Shared.Results;
 using FCG_Payments.Domain.Payments.Entities;
@@ -10,7 +9,7 @@ using FluentValidation;
 namespace FCG_Payments.Application.Payments.Services
 {
     public class PaymentService(IRepository<Payment> repository,
-                                IPaymentGateway gateway,
+                                IPaymentStrategy paymentStrategy,
                                 IEventPublisher publisher,
                                 IValidator<LibraryOrderEvent> orderValidator) : IPaymentService
     {
@@ -26,9 +25,9 @@ namespace FCG_Payments.Application.Payments.Services
             var paymentType = Enum.TryParse(orderEvent.PaymentType.ToString(), out EPaymentType ePaymentType);
 
             if(!paymentType)
-                return Result.Failure<PaymentResponse>(new Error("400","Forma de pagamento inválida"));            
+                return Result.Failure<PaymentResponse>(new Error("400","Forma de pagamento inválida"));
 
-            var payment = Payment.Create(orderEvent.ItemId, ePaymentType);                     
+            var payment = Payment.Create(orderEvent.ItemId, ePaymentType);            
 
             await repository.AddAsync(payment, cancellationToken);
 
@@ -43,7 +42,7 @@ namespace FCG_Payments.Application.Payments.Services
             if(payment is null)
                 return Result.Failure<PaymentResponse>(new Error("404","Pagamento não encontrado"));
 
-            var success = await gateway.Pay(paymentId, payment.PaymentType);
+            var success = await paymentStrategy.Pay(payment);
                  
             if(!success)
             {

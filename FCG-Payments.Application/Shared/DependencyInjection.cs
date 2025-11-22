@@ -1,4 +1,4 @@
-﻿using FCG_Payments.Application.Payments.Requests;
+﻿using FCG.Shared.Contracts;
 using FCG_Payments.Application.Payments.Services;
 using FCG_Payments.Application.Payments.Validators;
 using FCG_Payments.Application.Shared.Interfaces;
@@ -12,7 +12,7 @@ namespace FCG_Payments.Application.Shared
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<IPaymentService, PaymentService>();
-            services.AddScoped<IValidator<PaymentRequest>, PaymentRequestValidator>();
+            services.AddScoped<IValidator<LibraryOrderEvent>, LibraryOrderValidator>();
 
             return services;
         }
