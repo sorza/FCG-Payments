@@ -1,8 +1,5 @@
-﻿using FCG.Shared.Contracts;
-using FCG_Payments.Application.Payments.Services;
-using FCG_Payments.Application.Payments.Validators;
+﻿using FCG_Payments.Application.Payments.Services;
 using FCG_Payments.Application.Shared.Interfaces;
-using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FCG_Payments.Application.Shared
@@ -11,8 +8,7 @@ namespace FCG_Payments.Application.Shared
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services)
         {
-            services.AddScoped<IPaymentService, PaymentService>();
-            services.AddScoped<IValidator<LibraryOrderEvent>, LibraryOrderValidator>();
+            services.AddScoped<IPaymentService, PaymentService>();           
 
             return services;
         }

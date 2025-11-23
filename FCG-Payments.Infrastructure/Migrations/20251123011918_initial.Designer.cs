@@ -13,7 +13,7 @@ namespace FCG_Payments.Infrastructure.Migrations
 {
     [DbContext(typeof(PaymentDbContext))]
     [Migration("20251123011918_initial")]
-    partial class initial
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

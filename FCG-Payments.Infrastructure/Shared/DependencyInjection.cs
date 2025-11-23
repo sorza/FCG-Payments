@@ -33,7 +33,6 @@ namespace FCG_Payments.Infrastructure.Shared
             services.AddScoped<IRepository<Payment>, PaymentRepository>();
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<IPaymentResolver, PaymentFactory>();
-            services.AddScoped<IPaymentStrategy, PaymentStrategy>();
 
             return services;
         }
