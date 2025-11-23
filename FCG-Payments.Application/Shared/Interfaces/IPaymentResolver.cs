@@ -2,7 +2,7 @@
 
 namespace FCG_Payments.Application.Shared.Interfaces
 {
-    internal interface IPaymentResolver
+    public interface IPaymentResolver
     {
          IPaymentStrategy Resolve(EPaymentType type);        
     }

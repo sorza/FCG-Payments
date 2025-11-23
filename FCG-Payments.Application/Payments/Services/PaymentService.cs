@@ -37,6 +37,9 @@ namespace FCG_Payments.Application.Payments.Services
 
         public async Task<Result<PaymentResponse>> PayAsync(Guid paymentId, CancellationToken cancellationToken = default)
         {
+            if (paymentId == Guid.Empty)
+                return Result.Failure<PaymentResponse>(new Error("400", "Código de pagamento inválido"));
+
             var payment = await repository.GetByIdAsync(paymentId, cancellationToken);
 
             if(payment is null)

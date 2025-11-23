@@ -1,6 +1,5 @@
 ﻿using FCG.Shared.Contracts;
 using FCG_Payments.Application.Payments.Responses;
-using FCG_Payments.Application.Payments.Validators;
 using FCG_Payments.Application.Shared.Results;
 
 namespace FCG_Payments.Application.Shared.Interfaces

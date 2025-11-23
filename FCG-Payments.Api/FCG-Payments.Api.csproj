@@ -1,14 +1,26 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>FCG_Payments.Api</RootNamespace>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<NoWarn>$(NoWarn);1591</NoWarn>
+    <UserSecretsId>2d639b4f-1e2e-4bfe-a836-80090c24b230</UserSecretsId>
   </PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>		
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="8.0.0" />
+	</ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <ProjectReference Include="..\FCG-Payments.Infrastructure\FCG-Payments.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

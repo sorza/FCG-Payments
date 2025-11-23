@@ -1,22 +1,78 @@
-var builder = WebApplication.CreateBuilder(args);
+using FCG_Payments.Infrastructure.Shared;
+using FCG_Payments.Application.Shared;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
+using FCG_Payments.Infrastructure.Shared.Context;
+using Microsoft.EntityFrameworkCore;
 
-builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+namespace FCG_Payments.Api
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddInfrastructureServices(builder.Configuration);
+            builder.Services.AddApplicationServices();
+
+            builder.Services.AddControllers();
+
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+
+            });
+
+            var app = builder.Build();
+
+            app.UseExceptionHandler(errorApp =>
+            {
+                errorApp.Run(async context =>
+                {
+                    var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+                    var ex = exceptionHandlerPathFeature?.Error;
+
+                    context.Response.ContentType = "application/problem+json";
+
+                    var statusCode = ex switch
+                    {
+                        NotImplementedException => StatusCodes.Status501NotImplemented,
+                        TimeoutException => StatusCodes.Status504GatewayTimeout,
+                        InvalidOperationException => StatusCodes.Status502BadGateway,
+                        _ => StatusCodes.Status500InternalServerError
+                    };
+
+                    context.Response.StatusCode = statusCode;
+
+                    var problem = new ProblemDetails
+                    {
+                        Status = statusCode,
+                        Title = "Erro interno",
+                        Detail = "Ocorreu um erro inesperado. Tente novamente mais tarde."
+                    };
+
+                    await context.Response.WriteAsJsonAsync(problem);
+                });
+            });
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
+                db.Database.Migrate();
+            }
+
+            app.UseSwagger();
+            app.UseSwaggerUI();
+
+            app.UseHttpsRedirection();
+            app.UseAuthorization();
+            app.MapControllers();
+            app.Run();
+        }
+    }
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
