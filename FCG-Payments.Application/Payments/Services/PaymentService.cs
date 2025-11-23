@@ -22,6 +22,9 @@ namespace FCG_Payments.Application.Payments.Services
             if(payment is null)
                 return Result.Failure<PaymentResponse>(new Error("404","Pagamento não encontrado"));
 
+            if(payment.Status == EPaymentStatus.Approved)
+                return Result.Failure<PaymentResponse>(new Error("400", "Este pagamento já foi efetuado."));
+
             var paymentStrategy = resolver.Resolve(payment.PaymentType);
             var success = await paymentStrategy.Pay(payment);
                  
