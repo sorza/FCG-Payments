@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FCG.Shared.Contracts" Version="1.0.7" />
+    <PackageReference Include="FCG.Shared.Contracts" Version="1.0.8" />
   </ItemGroup>
 
 </Project>

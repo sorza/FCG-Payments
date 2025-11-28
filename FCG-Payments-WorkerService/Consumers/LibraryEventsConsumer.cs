@@ -1,13 +1,9 @@
 ﻿
 using Azure.Messaging.ServiceBus;
 using FCG.Shared.Contracts;
-using FCG.Shared.Contracts.Enums;
-using FCG_Payments.Application.Payments.Services;
 using FCG_Payments.Application.Shared.Interfaces;
 using FCG_Payments.Domain.Payments.Entities;
-using FCG_Payments.Infrastructure.Payments.Repositories;
 using System.Text.Json;
-using System.Threading;
 
 namespace FCG_Payments_WorkerService.Consumers
 {
