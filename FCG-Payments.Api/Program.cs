@@ -63,7 +63,21 @@ namespace FCG_Payments.Api
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
-                db.Database.Migrate();
+
+                var retries = 5;
+                while (retries > 0)
+                {
+                    try
+                    {
+                        db.Database.Migrate();
+                        break;
+                    }
+                    catch
+                    {
+                        retries--;
+                        Thread.Sleep(2000); 
+                    }
+                }
             }
 
             app.UseSwagger();
