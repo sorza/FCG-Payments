@@ -2,7 +2,7 @@ trigger:
 - main
 
 pool:
-  vmImage: 'LocalPool'
+  name: 'LocalPool'
 
 variables:
   acrName: 'fcgregistries.azurecr.io'
