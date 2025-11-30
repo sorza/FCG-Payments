@@ -27,6 +27,7 @@ stages:
         buildContext: $(buildContext)
         tags: |
           $(tag)
+          latest
 
   - job: BuildWorker
     displayName: Build Payments Worker
@@ -41,3 +42,4 @@ stages:
         buildContext: $(buildContext)
         tags: |
           $(tag)
+          latest
