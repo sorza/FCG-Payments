@@ -1,5 +1,6 @@
-﻿using FCG_Payments.Application.Shared.Interfaces;
-using FCG_Payments.Domain.Shared;
+﻿using FCG.Shared.Contracts.ClassDefinition;
+using FCG_Payments.Application.Shared.Interfaces;
+using FCG_Payments.Domain.Payments.Entities;
 using FCG_Payments.Infrastructure.Shared.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -41,6 +42,6 @@ namespace FCG_Payments.Infrastructure.Shared.Repositories
             _dbSet.RemoveRange(entities);
             return context.SaveChangesAsync(cancellationToken);
         }
-        
+       
     }
 }

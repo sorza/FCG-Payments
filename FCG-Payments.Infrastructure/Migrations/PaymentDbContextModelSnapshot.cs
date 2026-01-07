@@ -32,13 +32,13 @@ namespace FCG_Payments.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("OrderId");
-
                     b.Property<byte>("PaymentType")
                         .HasColumnType("TINYINT")
                         .HasColumnName("PaymentType");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("DECIMAL(18,2)")
+                        .HasColumnName("Price");
 
                     b.Property<byte>("Status")
                         .HasColumnType("TINYINT")

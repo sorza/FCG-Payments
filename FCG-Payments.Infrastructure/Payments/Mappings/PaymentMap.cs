@@ -14,11 +14,7 @@ namespace FCG_Payments.Infrastructure.Payments.Mappings
 
             builder.Property(p => p.Id)
                 .HasColumnName("PaymentId")
-                .IsRequired(true);
-
-            builder.Property(p => p.OrderId)
-                .HasColumnName("OrderId")
-                .IsRequired(true);
+                .IsRequired(true);        
 
             builder.Property(p => p.PaymentType)
                 .HasColumnName("PaymentType")
@@ -28,6 +24,11 @@ namespace FCG_Payments.Infrastructure.Payments.Mappings
             builder.Property(p => p.Status)
                 .HasColumnName("Status")
                 .HasColumnType("TINYINT")
+                .IsRequired(true);
+
+            builder.Property(p => p.Price)
+                .HasColumnName("Price")
+                .HasColumnType("DECIMAL(18,2)")
                 .IsRequired(true);
         }
     }

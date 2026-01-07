@@ -1,13 +1,15 @@
 ﻿using Azure.Messaging.ServiceBus;
+using FCG.Shared.Contracts.Events.Publisher;
+using FCG.Shared.Contracts.Events.Store;
+using FCG.Shared.Contracts.Interfaces;
 using FCG_Payments.Application.Shared.Interfaces;
-using FCG_Payments.Domain.Payments.Entities;
-using FCG_Payments.Infrastructure.Payments.Events;
 using FCG_Payments.Infrastructure.Payments.Repositories;
 using FCG_Payments.Infrastructure.Payments.Strategy;
 using FCG_Payments.Infrastructure.Shared.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 
 namespace FCG_Payments.Infrastructure.Shared
 {
@@ -20,7 +22,7 @@ namespace FCG_Payments.Infrastructure.Shared
           
 
             var connectionString = configuration["ServiceBus:ConnectionString"];
-            var queueName = configuration["ServiceBus:Queues:PaymentsEvents"];
+            var queueName = configuration["ServiceBus:Topics:Payments"];
 
             services.AddSingleton(new ServiceBusClient(connectionString));
 
@@ -30,7 +32,18 @@ namespace FCG_Payments.Infrastructure.Shared
                 return new ServiceBusEventPublisher(client, queueName!);
             });
 
-            services.AddScoped<IRepository<Payment>, PaymentRepository>();
+            var mongoString = configuration["MongoSettings:ConnectionString"];
+            var mongoDb = configuration["MongoSettings:Database"];
+            var mongoCollection = configuration["MongoSettings:Collection"];
+
+            services.AddSingleton<IMongoClient>(sp => new MongoClient(mongoString));
+
+            services.AddScoped<IEventStore>(sp =>
+            {
+                var client = sp.GetRequiredService<IMongoClient>();
+                return new MongoEventStore(client, mongoDb!, mongoCollection!);
+            });
+
             services.AddScoped<IPaymentRepository, PaymentRepository>();
             services.AddScoped<IPaymentResolver, PaymentFactory>();
 

@@ -28,4 +28,8 @@
     <ProjectReference Include="..\FCG-Payments.Domain\FCG-Payments.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>

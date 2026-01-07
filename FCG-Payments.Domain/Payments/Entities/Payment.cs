@@ -1,45 +1,44 @@
-﻿using FCG.Shared.Contracts.Enums;
+﻿using FCG.Shared.Contracts.ClassDefinition;
+using FCG.Shared.Contracts.Enums;
 using FCG_Payments.Domain.Payments.Exceptions.Payments;
-using FCG_Payments.Domain.Shared;
 
 namespace FCG_Payments.Domain.Payments.Entities
 {
     public class Payment : Entity
     {
         #region Properties
-
-        public Guid OrderId { get; private set; }
+               
         public EPaymentType PaymentType { get; private set; }
         public EPaymentStatus Status { get; private set; }
+        public decimal Price { get; private set; }
 
         #endregion
 
         #region Constructors
         private Payment(Guid id) : base(id) { }
 
-        private Payment(Guid id, Guid orderId, EPaymentType paymentType, EPaymentStatus status)
+        private Payment(Guid id, EPaymentStatus status, decimal price)
             : base(id)
         {
-            OrderId = orderId;
-            PaymentType = paymentType;
+            PaymentType = EPaymentType.Pix;
             Status = status;
+            Price = price;
         }
 
         #endregion
 
         #region Factory Methods
-        public static Payment Create(Guid orderId, EPaymentType paymentType)
-        {
-            if (orderId == Guid.Empty)
-                throw new OrderIdEmptyException(ErrorMessage.Payment.OrderIdIsEmpty);
+        public static Payment Create(decimal price, Guid Id = default)
+        {        
+            if (price <= 0)
+                throw new ArgumentException("O valor do pagamento não pode ser negativo");
 
-            if (!Enum.IsDefined(typeof(EPaymentType), paymentType))
-                throw new InvalidPaymentException(ErrorMessage.Payment.InvalidPaymentType);
+            if(Id == default) return new Payment(Guid.NewGuid(), EPaymentStatus.Pending, price);
 
-            return new Payment(Guid.NewGuid(), orderId, paymentType, EPaymentStatus.Pending);
+            return new Payment(Id, EPaymentStatus.Pending, price);
         }
+        
         #endregion
-               
 
         #region Methods
         public void UpdateStatus(EPaymentStatus newStatus)
@@ -48,7 +47,15 @@ namespace FCG_Payments.Domain.Payments.Entities
                 throw new InvalidStatusException(ErrorMessage.Payment.InvalidStatus);
             Status = newStatus;
             UpdateLastDateChanged();
-        }        
+        }
+
+        public void UpdatePaymentType(EPaymentType paymentType)
+        {
+            if (!Enum.IsDefined(typeof(EPaymentType), paymentType))
+                throw new InvalidPaymentException(ErrorMessage.Payment.InvalidPaymentType);
+            PaymentType = paymentType;
+            UpdateLastDateChanged();
+        }
 
         #endregion
 

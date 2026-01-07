@@ -12,7 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FCG.Shared.Contracts" Version="1.0.8" />   
+    <PackageReference Include="FCG.Shared.Contracts" Version="1.0.33" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />   
 	<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
   </ItemGroup>
 

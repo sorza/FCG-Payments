@@ -1,4 +1,5 @@
-﻿using FCG_Payments.Domain.Shared;
+﻿using FCG.Shared.Contracts.ClassDefinition;
+using FCG_Payments.Domain.Payments.Entities;
 
 namespace FCG_Payments.Application.Shared.Interfaces
 {
@@ -8,6 +9,6 @@ namespace FCG_Payments.Application.Shared.Interfaces
         Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
         Task AddAsync(T entity, CancellationToken cancellationToken = default);
         Task UpdateAsync(T entity, CancellationToken cancellationToken = default);
-        Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
+        Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);        
     }
 }

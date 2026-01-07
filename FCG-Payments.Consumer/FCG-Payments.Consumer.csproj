@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-FCG_Payments.Consumer-30e27b79-3d13-488c-838a-c5dc49fd0d67</UserSecretsId>
+    <RootNamespace>FCG_Payments.Consumer</RootNamespace>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
+		<PackageReference Include="FCG.Shared.Contracts" Version="1.0.33" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\FCG-Payments.Infrastructure\FCG-Payments.Infrastructure.csproj" />
+	</ItemGroup>
+</Project>

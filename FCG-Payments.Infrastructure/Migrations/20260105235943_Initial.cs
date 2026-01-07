@@ -16,9 +16,9 @@ namespace FCG_Payments.Infrastructure.Migrations
                 columns: table => new
                 {
                     PaymentId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PaymentType = table.Column<byte>(type: "TINYINT", nullable: false),
                     Status = table.Column<byte>(type: "TINYINT", nullable: false),
+                    Price = table.Column<decimal>(type: "DECIMAL(18,2)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
