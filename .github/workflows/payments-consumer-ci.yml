@@ -5,6 +5,9 @@ on:
     branches: [ main, develop ]
     paths:
       - 'FCG-Payments.Consumer/**'
+      - 'FCG-Payments.Application/**'
+      - 'FCG-Payments.Domain/**'
+      - 'FCG-Payments.Infrastructure/**'
       - '.github/workflows/payments-consumer-ci.yml'
 
 jobs:
