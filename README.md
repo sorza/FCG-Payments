@@ -494,27 +494,8 @@ public async Task<Payment> ProcessPaymentAsync(Guid paymentId)
 }
 ```
 
-### **Saga Pattern (Choreography)**
-Pagamento aprovado → Evento publicado → Libraries consome → Game adicionado à biblioteca
-- Se falhar, Libraries tenta novamente (retry automático do Service Bus)
-- Dead Letter Queue para falhas permanentes
-
----
-
-## 🛡️ Segurança e Boas Práticas
-
-### **PCI-DSS Compliance** *(Planejado)*
-- Nunca armazenar CVV/CVC
-- Tokenização de cartões de crédito
-- Criptografia de dados sensíveis (AES-256)
-- Logs nunca expõem dados sensíveis
-
-### **Circuit Breaker Pattern** *(Planejado)*
-Proteção contra falhas em gateways externos usando Polly:
-```csharp
-services.AddHttpClient<IPaymentGateway, DebitCardGateway>()
-    .AddTransientHttpErrorPolicy(p => p.CircuitBreakerAsync(5, TimeSpan.FromSeconds(30)));
-```
+### **Event-Driven Integration**
+O pagamento aprovado publica um evento (`PaymentProcessedEvent`) no Azure Service Bus que é consumido pelo Libraries Service para adicionar o jogo à biblioteca do usuário. Demonstra comunicação assíncrona entre microserviços.
 
 ---
 
