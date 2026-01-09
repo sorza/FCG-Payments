@@ -10,15 +10,16 @@
 
 ## 🎯 O que é este projeto?
 
-**FCG-Payments** é o **microsserviço de processamento de pagamentos** responsável por orquestrar transações financeiras, integrar múltiplos **gateways de pagamento** usando **Strategy Pattern**, e manter **auditoria completa** através de Event Sourcing. Demonstra integração com sistemas de pagamento externos e gestão de transações distribuídas.
+**FCG-Payments** é o **microsserviço de processamento de pagamentos** responsável por gerenciar transações financeiras usando **Strategy Pattern** para diferentes métodos de pagamento, e manter **auditoria completa** através de Event Sourcing. Demonstra aplicação de padrões de design e gestão de transações distribuídas.
 
 ### Responsabilidades Principais
-- ✅ Processamento de pagamentos com múltiplos gateways (Cartão de Débito, PayPal, PIX*)
-- ✅ Strategy Pattern para algoritmos de pagamento plugáveis
+- ✅ Processamento de pagamentos com múltiplos métodos (Cartão de Débito, Cartão de Crédito, PayPal, PIX)
+- ✅ **Strategy Pattern** para algoritmos de pagamento intercambiáveis (simulados para fins de demonstração)
 - ✅ Event Sourcing: histórico imutável de todas as transações
-- ✅ Publicação de eventos de domínio (PaymentCreated, PaymentProcessed, PaymentFailed)
+- ✅ Publicação de eventos de domínio (PaymentCreated, PaymentProcessed)
 - ✅ Consumo de eventos de Users/Games para validação de pagamentos
 - ✅ Autorização: apenas usuários autenticados podem processar pagamentos
+- ✅ Integração com Libraries Service para adicionar jogos após pagamento aprovado
 
 ---
 
@@ -36,6 +37,7 @@
 | **FluentValidation** | Validação | Regras de negócio declarativas |
 | **Swagger/Swashbuckle** | API Documentation | OpenAPI 3.0, Interactive testing |
 | **Docker** | Containerização | Portabilidade e deployment |
+| **HttpClient** | HTTP Communication | Chamadas para Libraries API |
 
 ### Padrões de Design Implementados
 
@@ -44,31 +46,50 @@
 // Abstração
 public interface IPaymentStrategy
 {
-    Task<PaymentResult> ProcessPaymentAsync(Payment payment);
+    Task<bool> Pay(Payment payment);
 }
 
-// Estratégias concretas
-public class DebitCardPayment : IPaymentStrategy { }
-public class PaypalPayment : IPaymentStrategy { }
-public class PixPayment : IPaymentStrategy { }
-
-// Contexto
-public class PaymentContext
+// Estratégias concretas (simuladas)
+public class DebitCardPayment : IPaymentStrategy 
 {
-    private readonly IPaymentStrategy _strategy;
+    public async Task<bool> Pay(Payment payment)
+    {
+        // Simula processamento de cartão de débito
+        Console.WriteLine($"Processando pagamento por {payment.PaymentType}...");
+        return true; // Aprovado
+    }
+}
+
+public class PaypalPayment : IPaymentStrategy 
+{
+    public async Task<bool> Pay(Payment payment)
+    {
+        // Simula falha de PayPal
+        Console.WriteLine($"Processando pagamento por {payment.PaymentType}...");
+        return false; // Rejeitado
+    }
+}
+
+public class PixPayment : IPaymentStrategy { }
+public class CreditCardPayment : IPaymentStrategy { }
+
+// Factory para selecionar estratégia
+public class PaymentFactory
+{
+    private readonly Dictionary<EPaymentType, IPaymentStrategy> _strategies;
     
-    public PaymentContext(IPaymentStrategy strategy) 
-        => _strategy = strategy;
-    
-    public Task<PaymentResult> Execute(Payment payment) 
-        => _strategy.ProcessPaymentAsync(payment);
+    public IPaymentStrategy Resolve(EPaymentType type)
+    {
+        return _strategies[type];
+    }
 }
 ```
 
 **Vantagens**:
 - ✅ Adicionar novos métodos de pagamento sem modificar código existente (Open/Closed Principle)
-- ✅ Cada gateway tem sua lógica isolada e testável
+- ✅ Cada método tem sua lógica isolada e testável
 - ✅ Seleção dinâmica de estratégia em runtime
+- ✅ Facilita testes unitários (mock de cada estratégia)
 
 #### 🏗️ **Clean Architecture (Onion Architecture)**
 ```
@@ -124,8 +145,10 @@ FCG-Payments/
 │
 ├── FCG-Payments.Domain/           # Entidades, Enums, Interfaces
 │   ├── Entities/
-│   │   └── Payment.cs             # Aggregate Root
-│   ├── Enums/
+│   │   ├── CreditCardPayment.cs
+│   │   ├── PaypalPayment.cs
+│   │   ├── PixPayment.cs
+│   │   └── PaymentFactory.cs
 │   │   ├── EPaymentStatus.cs      # Pending, Completed, Failed
 │   │   └── EPaymentType.cs        # DebitCard, PayPal, PIX
 │   ├── Events/
@@ -191,15 +214,8 @@ FCG-Payments/
   "Jwt": {
     "Key": "9y4XJg0aTphzFJw3TvksRvqHXd+Q4VB8f7ZvU08N+9Q=",
     "Issuer": "FGC-Users",
-    "Audience": "API"
-  },
-  "PaymentGateways": {
-    "DebitCard": {
-      "ApiKey": "<debit-card-gateway-key>",
-      "MerchantId": "<merchant-id>"
-    },
-    "PayPal": {
-      "ClientId": "<paypal-client-id>",
+   Services": {
+    "LibrariesApi": "https://localhost:7004" "ClientId": "<paypal-client-id>",
       "ClientSecret": "<paypal-secret>"
     }
   }
@@ -263,10 +279,6 @@ curl -X POST https://localhost:7003/api \
     "expiryDate": "12/25",
     "cvv": "123"
   }'
-```
-
-**Response**:
-```json
 {
   "paymentId": "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6",
   "status": "Pending",
@@ -337,25 +349,20 @@ graph TB
     
     Client -->|POST /api<br/>Auth: Bearer| APIM
     APIM -->|Validate JWT| API
+    API -->|CrDependent Microservices"
+        Libraries[Libraries Service<br/>Add game to library]
+    end
+    
+    Client -->|POST /api<br/>Auth: Bearer| APIM
+    APIM -->|Validate JWT| API
     API -->|Create Payment| AppService
     AppService -->|Select Strategy| StrategyFactory
     StrategyFactory -->|DebitCard?| DebitCard
     StrategyFactory -->|PayPal?| PayPal
     StrategyFactory -->|PIX?| PIX
     
-    DebitCard -->|Process Transaction| Gateway1
-    PayPal -->|Process Transaction| Gateway2
-    
-    AppService -->|Save Payment| SQL
-    AppService -->|Append Event| Mongo
-    AppService -->|Publish Event| SB
-    
-    SB -->|PaymentProcessedEvent| Libraries
-    SB -->|Payment Events| Consumer
-    
-    Libraries -->|Add Game to Library| Libraries
-    
-    style DebitCard fill:#4CAF50
+    DebitCard -->|Simulate Processing| DebitCard
+    PayPal -->|Simulate Processing| PayPal
     style PayPal fill:#0070BA
     style PIX fill:#00C9A7
     style Gateway1 fill:#FF5722
@@ -373,9 +380,7 @@ sequenceDiagram
     participant PaymentService
     participant StrategyFactory
     participant DebitCardStrategy
-    participant PaymentGateway
-    participant SQL
-    participant EventStore
+    participant PaymentGat
     participant ServiceBus
     participant LibrariesService
     
@@ -384,28 +389,26 @@ sequenceDiagram
     PaymentsAPI->>PaymentService: ProcessPaymentAsync()
     PaymentService->>StrategyFactory: GetStrategy(paymentType)
     StrategyFactory-->>PaymentService: DebitCardStrategy
-    PaymentService->>DebitCardStrategy: ProcessPaymentAsync()
-    DebitCardStrategy->>PaymentGateway: Charge Card (External API)
-    PaymentGateway-->>DebitCardStrategy: Success/Failure
-    DebitCardStrategy-->>PaymentService: PaymentResult
-    PaymentService->>SQL: Update Status = Completed
-    PaymentService->>EventStore: Append PaymentProcessedEvent
-    PaymentService->>ServiceBus: Publish PaymentProcessedEvent
-    ServiceBus->>LibrariesService: Event Received
-    LibrariesService->>LibrariesService: Add Game to User's Library
-    PaymentService-->>PaymentsAPI: PaymentResult
-    PaymentsAPI-->>User: 200 OK {status: Completed}
-```
-
----
-
+    PaymentServiSQL
+    participant EventStore
+    participant ServiceBus
+    participant LibrariesAPI
+    
+    User->>PaymentsAPI: POST /api/{id}/process
+    PaymentsAPI->>PaymentsAPI: Validate JWT
+    PaymentsAPI->>PaymentService: ProcessPaymentAsync(id)
+    PaymentService->>StrategyFactory: Resolve(paymentType)
+    StrategyFactory-->>PaymentService: DebitCardStrategy
+    PaymentService->>DebitCardStrategy: Pay(payment)
+    DebitCardStrategy->>DebitCardStrategy: Simulate Processing
+    DebitCardStrategy-->>PaymentService: true/false (approved/rejected)
 ## 🧪 Padrões de Código Demonstrados
 
 ### Strategy Pattern Implementation
 ```csharp
 // Factory para selecionar estratégia
-public class PaymentStrategyFactory
-{
+publPaymentService->>LibrariesAPI: POST /api (HttpClient)<br/>Add game to library
+    LibrariesAPI-->>PaymentService: 200 OK
     private readonly IServiceProvider _serviceProvider;
     
     public IPaymentStrategy GetStrategy(EPaymentType type)
@@ -417,60 +420,104 @@ public class PaymentStrategyFactory
             EPaymentType.PIX => _serviceProvider.GetRequiredService<PixPayment>(),
             _ => throw new NotSupportedException($"Payment type {type} not supported")
         };
+    }Factory : IPaymentResolver
+{
+    private readonly Dictionary<EPaymentType, IPaymentStrategy> _strategies;
+    
+    public PaymentFactory()
+    {
+        _strategies = new Dictionary<EPaymentType, IPaymentStrategy>
+        {
+            { EPaymentType.CreditCard, new CreditCardPayment() },
+            { EPaymentType.DebitCard, new DebitCardPayment() },
+            { EPaymentType.PayPal, new PaypalPayment() },
+            { EPaymentType.PIX, new PixPayment() }
+        };
+    }
+    
+    public IPaymentStrategy Resolve(EPaymentType type)
+    {
+        return _strategies[type];
     }
 }
 
 // Uso no serviço
-public async Task<PaymentResult> ProcessPaymentAsync(Guid paymentId)
+public async Task<Payment> ProcessPaymentAsync(Guid paymentId)
 {
-    var payment = await _repository.GetByIdAsync(paymentId);
-    var strategy = _strategyFactory.GetStrategy(payment.PaymentType);
+    var payment = await _paymentRepository.GetByIdAsync(paymentId);
     
-    var result = await strategy.ProcessPaymentAsync(payment);
+    // Seleciona estratégia baseada no tipo de pagamento
+    var strategy = _paymentResolver.Resolve(payment.PaymentType);
     
-    if (result.Success)
+    // Executa o processamento (simulado)
+    var success = await strategy.Pay(payment);
+    
+    if (success)
     {
-        payment.MarkAsCompleted(result.TransactionId);
+        payment.Status = EPaymentStatus.Completed;
+        
+        // Publica evento
         await _eventPublisher.PublishAsync(new PaymentProcessedEvent
         {
             PaymentId = payment.Id,
+            UserId = payment.UserId,
+            GameId = payment.GameId,
             Amount = payment.Amount,
             ProcessedAt = DateTime.UtcNow
         });
+        
+        // Chama Libraries API para adicionar jogo à biblioteca
+        var librariesClient = _httpClientFactory.CreateClient("LibrariesApi");
+        await librariesClient.PostAsJsonAsync("/api", new { 
+            UserId = payment.UserId, 
+            GameId = payment.GameId 
+        });
+    }
+    else
+    {
+        payment.Status = EPaymentStatus.Failed;
     }
     
-    return result;
+    await _paymentRepository.UpdateAsync(payment);
+    return paymennt,
+    paStrategy Pattern em Ação**
+Permite adicionar novos métodos de pagamento sem modificar o código existente:
+```csharp
+// Para adicionar novo método, basta criar nova classe:
+public class CryptoPayment : IPaymentStrategy
+{
+    publprocessamento duplicado do mesmo pagamento:
+```csharp
+public async Task<Payment> ProcessPaymentAsync(Guid paymentId)
+{
+    var payment = await _paymentRepository.GetByIdAsync(paymentId);
+    
+    // Verifica se já foi processado
+    if (payment.Status == EPaymentStatus.Completed)
+        return payment; // Já processado, retorna sem fazer nada
+    
+    // Processa apenas se estiver pendente
+    if (payment.Status == EPaymentStatus.Pending)
+    {
+        var strategy = _paymentResolver.Resolve(payment.PaymentType);
+        var success = await strategy.Pay(payment);
+        
+        payment.Status = success ? EPaymentStatus.Completed : EPaymentStatus.Failed;
+        await _paymentRepository.UpdateAsync(payment);
+    }
+    
+    return payment;
 }
 ```
 
----
-
-## 📊 Observabilidade
-
-### Logs Estruturados
-```csharp
-_logger.LogInformation(
-    "Pagamento processado | PaymentId: {PaymentId} | Amount: {Amount} | Type: {Type} | CorrelationId: {CorrelationId}",
-    payment.Id,
-    payment.Amount,
-    payment.PaymentType,
-    HttpContext.TraceIdentifier
-);
-```
-
-### Métricas Críticas
-- Taxa de sucesso/falha por gateway
-- Latência de processamento por tipo de pagamento
-- Volume transacional (diário, semanal)
-- Chargebacks e estornos
-
----
-
-## 🎓 Conceitos Avançados Demonstrados
-
-### **PCI-DSS Compliance**
-- Não armazenamos CVV (apenas em memória durante transação)
-- Números de cartão tokenizados via gateway
+### **Saga Pattern (Choreography)**
+Pagamento aprovado → Evento publicado → Libraries consome → Game adicionado à biblioteca
+- Se falhar, Libraries tenta novamente (retry automático do Service Bus)
+- DStrategy Pattern (Gang of Four)](https://en.wikipedia.org/wiki/Strategy_pattern)
+- [Event Sourcing (Martin Fowler)](https://martinfowler.com/eaaDev/EventSourcing.html)
+- [Clean Architecture (Uncle Bob)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Microservices Patterns (Chris Richardson)](https://microservices.io/patterns/data/event-sourcing.html)
+- [Saga Pattern](https://microservices.io/patterns/data/saga
 - Logs nunca expõem dados sensíveis
 
 ### **Idempotency**
