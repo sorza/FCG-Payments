@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FCG_Payments.Api.Controllers
 {
     [ApiController]
-    [Route("payments")]
+    [Route("api")]
     public class PaymentController(IPaymentService service) : ControllerBase
     {
         /// <summary>
