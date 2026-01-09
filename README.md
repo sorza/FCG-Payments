@@ -214,10 +214,10 @@ FCG-Payments/
   "Jwt": {
     "Key": "9y4XJg0aTphzFJw3TvksRvqHXd+Q4VB8f7ZvU08N+9Q=",
     "Issuer": "FGC-Users",
-   Services": {
-    "LibrariesApi": "https://localhost:7004" "ClientId": "<paypal-client-id>",
-      "ClientSecret": "<paypal-secret>"
-    }
+    "Audience": "API"
+  },
+  "Services": {
+    "LibrariesApi": "https://localhost:7004"
   }
 }
 ```
@@ -273,12 +273,12 @@ curl -X POST https://localhost:7003/api \
     "userId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "gameId": "7b8c9d0e-1f2a-3b4c-5d6e-7f8a9b0c1d2e",
     "amount": 59.99,
-    "paymentType": "DebitCard",
-    "cardNumber": "4111111111111111",
-    "cardHolderName": "John Doe",
-    "expiryDate": "12/25",
-    "cvv": "123"
+    "paymentType": "DebitCard"
   }'
+```
+
+**Response**:
+```json
 {
   "paymentId": "a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6",
   "status": "Pending",
@@ -338,18 +338,7 @@ graph TB
         Consumer[Payments Consumer<br/>Background Service]
     end
     
-    subgraph "External Services"
-        Gateway1[Debit Card Gateway<br/>External API]
-        Gateway2[PayPal API<br/>External API]
-    end
-    
     subgraph "Dependent Microservices"
-        Libraries[Libraries Service<br/>Activate purchased games]
-    end
-    
-    Client -->|POST /api<br/>Auth: Bearer| APIM
-    APIM -->|Validate JWT| API
-    API -->|CrDependent Microservices"
         Libraries[Libraries Service<br/>Add game to library]
     end
     
@@ -363,10 +352,19 @@ graph TB
     
     DebitCard -->|Simulate Processing| DebitCard
     PayPal -->|Simulate Processing| PayPal
+    
+    AppService -->|Save Payment| SQL
+    AppService -->|Append Event| Mongo
+    AppService -->|Publish Event| SB
+    
+    SB -->|PaymentProcessedEvent| Libraries
+    SB -->|Payment Events| Consumer
+    
+    Libraries -->|Add Game to Library| Libraries
+    
+    style DebitCard fill:#4CAF50
     style PayPal fill:#0070BA
     style PIX fill:#00C9A7
-    style Gateway1 fill:#FF5722
-    style Gateway2 fill:#FF9800
 ```
 
 ---
@@ -380,16 +378,7 @@ sequenceDiagram
     participant PaymentService
     participant StrategyFactory
     participant DebitCardStrategy
-    participant PaymentGat
-    participant ServiceBus
-    participant LibrariesService
-    
-    User->>PaymentsAPI: POST /api/process<br/>{amount, paymentType}
-    PaymentsAPI->>PaymentsAPI: Validate JWT
-    PaymentsAPI->>PaymentService: ProcessPaymentAsync()
-    PaymentService->>StrategyFactory: GetStrategy(paymentType)
-    StrategyFactory-->>PaymentService: DebitCardStrategy
-    PaymentServiSQL
+    participant SQL
     participant EventStore
     participant ServiceBus
     participant LibrariesAPI
@@ -402,14 +391,29 @@ sequenceDiagram
     PaymentService->>DebitCardStrategy: Pay(payment)
     DebitCardStrategy->>DebitCardStrategy: Simulate Processing
     DebitCardStrategy-->>PaymentService: true/false (approved/rejected)
+    PaymentService->>SQL: Save payment status
+    PaymentService->>EventStore: Append PaymentProcessedEvent
+    PaymentService->>ServiceBus: Publish PaymentProcessedEvent
+    ServiceBus->>LibrariesAPI: PaymentProcessedEvent
+    LibrariesAPI->>LibrariesAPI: Add game to user library
+    LibrariesAPI-->>ServiceBus: Acknowledged
+```
+
+---
+
 ## 🧪 Padrões de Código Demonstrados
 
 ### Strategy Pattern Implementation
 ```csharp
 // Factory para selecionar estratégia
-publPaymentService->>LibrariesAPI: POST /api (HttpClient)<br/>Add game to library
-    LibrariesAPI-->>PaymentService: 200 OK
+public class PaymentFactory : IPaymentResolver
+{
     private readonly IServiceProvider _serviceProvider;
+    
+    public PaymentFactory(IServiceProvider serviceProvider)
+    {
+        _serviceProvider = serviceProvider;
+    }
     
     public IPaymentStrategy GetStrategy(EPaymentType type)
     {
@@ -420,24 +424,6 @@ publPaymentService->>LibrariesAPI: POST /api (HttpClient)<br/>Add game to librar
             EPaymentType.PIX => _serviceProvider.GetRequiredService<PixPayment>(),
             _ => throw new NotSupportedException($"Payment type {type} not supported")
         };
-    }Factory : IPaymentResolver
-{
-    private readonly Dictionary<EPaymentType, IPaymentStrategy> _strategies;
-    
-    public PaymentFactory()
-    {
-        _strategies = new Dictionary<EPaymentType, IPaymentStrategy>
-        {
-            { EPaymentType.CreditCard, new CreditCardPayment() },
-            { EPaymentType.DebitCard, new DebitCardPayment() },
-            { EPaymentType.PayPal, new PaypalPayment() },
-            { EPaymentType.PIX, new PixPayment() }
-        };
-    }
-    
-    public IPaymentStrategy Resolve(EPaymentType type)
-    {
-        return _strategies[type];
     }
 }
 
@@ -447,7 +433,7 @@ public async Task<Payment> ProcessPaymentAsync(Guid paymentId)
     var payment = await _paymentRepository.GetByIdAsync(paymentId);
     
     // Seleciona estratégia baseada no tipo de pagamento
-    var strategy = _paymentResolver.Resolve(payment.PaymentType);
+    var strategy = _paymentFactory.GetStrategy(payment.PaymentType);
     
     // Executa o processamento (simulado)
     var success = await strategy.Pay(payment);
@@ -479,14 +465,12 @@ public async Task<Payment> ProcessPaymentAsync(Guid paymentId)
     }
     
     await _paymentRepository.UpdateAsync(payment);
-    return paymennt,
-    paStrategy Pattern em Ação**
-Permite adicionar novos métodos de pagamento sem modificar o código existente:
-```csharp
-// Para adicionar novo método, basta criar nova classe:
-public class CryptoPayment : IPaymentStrategy
-{
-    publprocessamento duplicado do mesmo pagamento:
+    return payment;
+}
+```
+
+### **Idempotency (Previne Processamento Duplicado)**
+Previne o processamento duplicado do mesmo pagamento:
 ```csharp
 public async Task<Payment> ProcessPaymentAsync(Guid paymentId)
 {
@@ -499,7 +483,7 @@ public async Task<Payment> ProcessPaymentAsync(Guid paymentId)
     // Processa apenas se estiver pendente
     if (payment.Status == EPaymentStatus.Pending)
     {
-        var strategy = _paymentResolver.Resolve(payment.PaymentType);
+        var strategy = _paymentFactory.GetStrategy(payment.PaymentType);
         var success = await strategy.Pay(payment);
         
         payment.Status = success ? EPaymentStatus.Completed : EPaymentStatus.Failed;
@@ -513,28 +497,17 @@ public async Task<Payment> ProcessPaymentAsync(Guid paymentId)
 ### **Saga Pattern (Choreography)**
 Pagamento aprovado → Evento publicado → Libraries consome → Game adicionado à biblioteca
 - Se falhar, Libraries tenta novamente (retry automático do Service Bus)
-- DStrategy Pattern (Gang of Four)](https://en.wikipedia.org/wiki/Strategy_pattern)
-- [Event Sourcing (Martin Fowler)](https://martinfowler.com/eaaDev/EventSourcing.html)
-- [Clean Architecture (Uncle Bob)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [Microservices Patterns (Chris Richardson)](https://microservices.io/patterns/data/event-sourcing.html)
-- [Saga Pattern](https://microservices.io/patterns/data/saga
-- Logs nunca expõem dados sensíveis
+- Dead Letter Queue para falhas permanentes
 
-### **Idempotency**
-Previne cobranças duplicadas:
-```csharp
-[HttpPost("{id}/process")]
-public async Task<IActionResult> Process(Guid id, [FromHeader] string idempotencyKey)
-{
-    if (await _cache.ExistsAsync(idempotencyKey))
-        return Ok(await _cache.GetAsync<PaymentResult>(idempotencyKey));
-    
-    var result = await _service.ProcessPaymentAsync(id);
-    await _cache.SetAsync(idempotencyKey, result, TimeSpan.FromHours(24));
-    
-    return Ok(result);
-}
-```
+---
+
+## 🛡️ Segurança e Boas Práticas
+
+### **PCI-DSS Compliance** *(Planejado)*
+- Nunca armazenar CVV/CVC
+- Tokenização de cartões de crédito
+- Criptografia de dados sensíveis (AES-256)
+- Logs nunca expõem dados sensíveis
 
 ### **Circuit Breaker Pattern** *(Planejado)*
 Proteção contra falhas em gateways externos usando Polly:
@@ -548,7 +521,7 @@ services.AddHttpClient<IPaymentGateway, DebitCardGateway>()
 ## 📚 Referências Técnicas
 
 - [Strategy Pattern (Refactoring Guru)](https://refactoring.guru/design-patterns/strategy)
-- [PCI-DSS Compliance](https://www.pcisecuritystandards.org/)
 - [Event Sourcing (Martin Fowler)](https://martinfowler.com/eaaDev/EventSourcing.html)
 - [Clean Architecture (Uncle Bob)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [Microservices Patterns (Chris Richardson)](https://microservices.io/patterns/data/event-sourcing.html)
+- [Saga Pattern](https://microservices.io/patterns/data/saga.html)
