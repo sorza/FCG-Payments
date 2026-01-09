@@ -2,12 +2,14 @@
 using FCG.Shared.Contracts.Results;
 using FCG_Payments.Application.Payments.Requests;
 using FCG_Payments.Application.Shared.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FCG_Payments.Api.Controllers
 {
     [ApiController]
     [Route("api")]
+    [Authorize]
     public class PaymentController(IPaymentService service) : ControllerBase
     {
         /// <summary>
