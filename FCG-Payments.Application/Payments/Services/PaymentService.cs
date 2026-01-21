@@ -30,7 +30,7 @@ namespace FCG_Payments.Application.Payments.Services
 
             foreach (var libraryItemId in request.LibraryItensId)
             {
-                var libraryItem = await librariesClient.GetAsync($"/libraries/{libraryItemId}", cancellationToken);
+                var libraryItem = await librariesClient.GetAsync($"api/{libraryItemId}", cancellationToken);
                 if(!libraryItem.IsSuccessStatusCode)
                     return Result.Failure<PaymentResponse>(new Error("404", $"Item de biblioteca {libraryItemId} não encontrado."));  
                 
