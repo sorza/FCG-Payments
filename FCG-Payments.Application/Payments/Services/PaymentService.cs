@@ -66,7 +66,7 @@ namespace FCG_Payments.Application.Payments.Services
             
             var librariesClient = httpClient.CreateClient("LibrariesApi");
            
-            var itens = await librariesClient.GetAsync($"/libraries/payments/{paymentId}", cancellationToken);
+            var itens = await librariesClient.GetAsync($"api/payments/{paymentId}", cancellationToken);
 
             if(!itens.IsSuccessStatusCode)
                 return Result.Failure<PaymentResponse>(new Error("404", "Itens da biblioteca não encontrados para este pagamento."));
