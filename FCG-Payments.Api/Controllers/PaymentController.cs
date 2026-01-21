@@ -120,13 +120,5 @@ namespace FCG_Payments.Api.Controllers
 
             return TypedResults.Ok(result.Value);
         }
-
-        /// <summary>
-        /// Retorna 220 se a aplicação estiver saudável.
-        /// </summary>
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [AllowAnonymous]
-        [HttpGet("/health")]
-        public async Task<IResult> Health() => TypedResults.Ok();
     }
 }
