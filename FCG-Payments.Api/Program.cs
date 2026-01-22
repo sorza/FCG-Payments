@@ -91,25 +91,25 @@ namespace FCG_Payments.Api
             app.UseMiddleware<GlobalExceptionMiddleware>();
             app.UseMiddleware<CorrelationIdMiddleware>();
 
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
+            //using (var scope = app.Services.CreateScope())
+            //{
+            //    var db = scope.ServiceProvider.GetRequiredService<PaymentDbContext>();
 
-                var retries = 5;
-                while (retries > 0)
-                {
-                    try
-                    {
-                        db.Database.Migrate();
-                        break;
-                    }
-                    catch
-                    {
-                        retries--;
-                        Thread.Sleep(2000); 
-                    }
-                }
-            }
+            //    var retries = 5;
+            //    while (retries > 0)
+            //    {
+            //        try
+            //        {
+            //            db.Database.Migrate();
+            //            break;
+            //        }
+            //        catch
+            //        {
+            //            retries--;
+            //            Thread.Sleep(2000); 
+            //        }
+            //    }
+            //}
 
             app.UseSwagger();
             app.UseSwaggerUI();
@@ -117,7 +117,6 @@ namespace FCG_Payments.Api
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();
-            app.MapHealthChecks("/health");
 
             app.Run();
         }
