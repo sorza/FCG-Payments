@@ -17,6 +17,11 @@ namespace FCG_Payments.Consumer
             var builder = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((context, services) =>
                 {
+                    services.AddApplicationInsightsTelemetryWorkerService(options =>
+                    {
+                        options.ConnectionString = context.Configuration["ApplicationInsights:ConnectionString"];
+                    });
+
                     services.AddDbContext<PaymentDbContext>(options =>
                         options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection")));
 
