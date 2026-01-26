@@ -101,7 +101,7 @@ namespace FCG_Payments.Api
             {
                 using (var scope = app.Services.CreateScope())
                 {
-                    var db = scope.ServiceProvider.GetRequiredService<UsersDbContext>();
+                    var db = scope.ServiceProvider.GetRequiredService<PaymentsDbContext>();
 
                     var retries = 5;
                     while (retries > 0)
