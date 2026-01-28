@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-api
+  namespace: payments
+  labels:
+    app: payments-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payments-api
+  template:
+    metadata:
+      labels:
+        app: payments-api
+    spec:
+      containers:
+      - name: payments-api
+        image: alexandresorza/fcg-payments-api:latest
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: fcg-config
+              key: ASPNETCORE_ENVIRONMENT
+        - name: ApplicationInsights__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: fcg-secrets
+              key: appinsights-connection-string
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: fcg-secrets
+              key: sql-payments-connection
+        - name: ServiceBus__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: fcg-secrets
+              key: servicebus-connection
+        - name: ServiceBus__Topics__Payments
+          valueFrom:
+            configMapKeyRef:
+              name: fcg-config
+              key: TOPIC_PAYMENTS
+        - name: MongoSettings__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: fcg-secrets
+              key: cosmosdb-connection
+        - name: MongoSettings__Database
+          value: "EventStoreDb"
+        - name: MongoSettings__Collection
+          value: "Events"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "fcg-keyvault-secrets"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-api-service
+  namespace: payments
+spec:
+  selector:
+    app: payments-api
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+

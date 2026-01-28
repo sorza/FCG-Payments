@@ -52,6 +52,6 @@ jobs:
     
     - name: Deploy to AKS
       run: |
-        kubectl apply -f ../k8s/shared/secretproviderclass-payments.yaml
-        kubectl apply -f ../k8s/payments/api/
+        kubectl apply -f k8s/secretproviderclass-payments.yaml
+        kubectl apply -f k8s/api/
         kubectl rollout status deployment/payments-api -n payments --timeout=300s

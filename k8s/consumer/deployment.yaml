@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-consumer
+  namespace: payments
+  labels:
+    app: payments-consumer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payments-consumer
+  template:
+    metadata:
+      labels:
+        app: payments-consumer
+    spec:
+      containers:
+      - name: payments-consumer
+        image: alexandresorza/fcg-payments-consumer:latest
+        volumeMounts:
+        - name: secrets-store
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: fcg-config
+              key: ASPNETCORE_ENVIRONMENT
+        - name: ApplicationInsights__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: fcg-secrets
+              key: appinsights-connection-string
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: fcg-secrets
+              key: sql-payments-connection
+        - name: ServiceBus__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: fcg-secrets
+              key: servicebus-connection
+        - name: ServiceBus__Topics__Payments
+          valueFrom:
+            configMapKeyRef:
+              name: fcg-config
+              key: TOPIC_PAYMENTS
+        - name: ServiceBus__Topics__Libraries
+          valueFrom:
+            configMapKeyRef:
+              name: fcg-config
+              key: TOPIC_LIBRARIES
+        - name: ServiceBus__Subscriptions__Payments
+          valueFrom:
+            configMapKeyRef:
+              name: fcg-config
+              key: SUB_PAYMENTS
+        - name: ServiceBus__Subscriptions__Libraries
+          valueFrom:
+            configMapKeyRef:
+              name: fcg-config
+              key: SUB_PAYMENTS_LIBRARIES
+        - name: ConnectionStrings__DefaultConnection
+          valueFrom:
+            secretKeyRef:
+              name: fcg-secrets
+              key: sql-payments-connection
+        - name: MongoSettings__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: fcg-secrets
+              key: cosmosdb-connection
+        - name: MongoSettings__Database
+          value: "EventStoreDb"
+        - name: MongoSettings__Collection
+          value: "Events"
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "50m"
+          limits:
+            memory: "256Mi"
+            cpu: "100m"
+      volumes:
+      - name: secrets-store
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: "fcg-keyvault-secrets"
+
