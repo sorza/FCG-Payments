@@ -38,3 +38,20 @@ jobs:
           alexandresorza/fcg-payments-consumer:${{ github.sha }}
         cache-from: type=gha
         cache-to: type=gha,mode=max
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Set AKS context
+      uses: azure/aks-set-context@v3
+      with:
+        cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+        resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+    
+    - name: Deploy to AKS
+      run: |
+        kubectl apply -f ../k8s/shared/secretproviderclass-payments.yaml
+        kubectl apply -f ../k8s/payments/consumer/
+        kubectl rollout status deployment/payments-consumer -n payments --timeout=300s
