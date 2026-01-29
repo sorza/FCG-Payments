@@ -73,18 +73,4 @@ spec:
           readOnly: true
           volumeAttributes:
             secretProviderClass: "fcg-keyvault-secrets"
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: payments-api-service
-  namespace: payments
-spec:
-  selector:
-    app: payments-api
-  ports:
-  - protocol: TCP
-    port: 80
-    targetPort: 80
-  type: ClusterIP
 
