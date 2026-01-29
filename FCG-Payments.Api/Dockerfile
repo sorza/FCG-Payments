@@ -41,7 +41,7 @@ COPY --from=build --chown=appuser:appuser /app/publish .
 
 USER appuser
 
-ENV ASPNETCORE_URLS=http://+:80 \
+ENV ASPNETCORE_URLS="http://+:8080" \
     DOTNET_RUNNING_IN_CONTAINER=true \
     DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
 
