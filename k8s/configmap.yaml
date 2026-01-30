@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: fcg-config
-  namespace: fcg-payments
+  namespace: payments
 data:
   TOPIC_USERS: "users-topic"
   TOPIC_GAMES: "games-topic"
