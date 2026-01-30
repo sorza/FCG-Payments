@@ -33,7 +33,8 @@ LABEL maintainer="FCG Team" \
 
 WORKDIR /app
 
-RUN addgroup -g 1000 appuser && \
+RUN apk add --no-cache icu-libs && \
+    addgroup -g 1000 appuser && \
     adduser -u 1000 -G appuser -s /bin/sh -D appuser && \
     chown -R appuser:appuser /app
 
@@ -43,7 +44,7 @@ USER appuser
 
 ENV ASPNETCORE_URLS="http://+:8080" \
     DOTNET_RUNNING_IN_CONTAINER=true \
-    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=true
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
 EXPOSE 8080
 

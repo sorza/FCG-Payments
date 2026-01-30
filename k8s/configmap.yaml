@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fcg-config
+  namespace: fcg-payments
+data:
+  TOPIC_USERS: "users-topic"
+  TOPIC_GAMES: "games-topic"
+  TOPIC_PAYMENTS: "payments-topic"
+  TOPIC_LIBRARIES: "libraries-topic"
+  SUB_USERS: "users-api-sub"
+  SUB_GAMES: "games-api-sub"
+  SUB_PAYMENTS: "payments-api-sub"
+  SUB_LIBRARIES: "libraries-api-sub"
+  SUB_LIBRARIES_USERS: "libraries-users-sub"
+  SUB_LIBRARIES_GAMES: "libraries-games-sub"
+  SUB_LIBRARIES_PAYMENTS: "libraries-payments-sub"
+  SUB_PAYMENTS_LIBRARIES: "payments-libraries-sub"
+  ASPNETCORE_ENVIRONMENT: "Production"
+  Logging__LogLevel__Default: "Information"
+  Logging__LogLevel__Microsoft: "Warning"
+  Logging__LogLevel__Microsoft.Hosting.Lifetime: "Information"

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: payments-consumer
-  namespace: payments
+  namespace: fcg-payments
   labels:
     app: payments-consumer
 spec:
