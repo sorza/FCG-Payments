@@ -18,6 +18,7 @@ spec:
       containers:
       - name: payments-api
         image: alexandresorza/fcg-payments-api:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
         volumeMounts:

@@ -18,6 +18,7 @@ spec:
       containers:
       - name: payments-consumer
         image: alexandresorza/fcg-payments-consumer:latest
+        imagePullPolicy: Always
         volumeMounts:
         - name: secrets-store
           mountPath: "/mnt/secrets-store"
