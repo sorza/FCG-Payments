@@ -42,6 +42,7 @@ COPY --from=build --chown=appuser:appuser /app/publish .
 USER appuser
 
 ENV DOTNET_RUNNING_IN_CONTAINER=true \
-    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
+    DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false \
+    DOTNET_LOCALE=en-US
 
 ENTRYPOINT ["dotnet", "FCG-Payments.Consumer.dll"]
